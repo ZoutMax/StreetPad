@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>StreetPad settings</title>
+<style>
+  :root {
+    --bg: #15181e; --panel: #1d2129; --line: #2c323d; --text: #e7eaf0; --dim: #9aa3b2;
+    --accent: #3d8bfd; --accent2: #66a3ff; --ok: #3ccf91; --warn: #ffb547;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.45 "Segoe UI", system-ui, sans-serif; user-select: none; }
+  body { display: flex; flex-direction: column; }
+  header, main, footer { width: 100%; max-width: 960px; margin: 0 auto; }
+  .bar { border-bottom: 1px solid var(--line); }
+  .bar-top { border-top: 1px solid var(--line); }
+  header { display: flex; align-items: center; gap: 12px; padding: 14px 20px; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  header .sub { color: var(--dim); font-size: 12px; }
+  header .spacer { flex: 1; }
+  main { flex: 1; overflow: auto; padding: 8px 20px 20px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-top: 12px; }
+  section h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); margin: 0 0 10px; font-weight: 600; }
+  .row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+  .row label.name { width: 190px; flex: none; color: var(--text); }
+  .row .val { width: 56px; text-align: right; color: var(--dim); font-variant-numeric: tabular-nums; }
+  input[type=range] { flex: 1; accent-color: var(--accent); }
+  select, button { font: inherit; color: var(--text); background: #262b35; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; }
+  select { flex: 1; min-width: 0; }
+  button { cursor: pointer; }
+  button:hover, select:hover { border-color: var(--accent); }
+  select:focus, button:focus, input:focus { outline: 2px solid var(--accent2); outline-offset: 2px; }
+  section.current { border-color: #3a4a66; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: var(--accent2); }
+  input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; }
+  .check { display: flex; align-items: center; gap: 8px; margin: 8px 0; cursor: pointer; }
+  .hint { color: var(--dim); font-size: 12px; }
+  .bmap { display: grid; grid-template-columns: 150px 1fr 1fr; gap: 6px 12px; align-items: center; }
+  .bmap .head { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  .bmap select:disabled { opacity: .35; }
+  .bm-list { display: flex; flex-direction: column; gap: 6px; }
+  .bm { display: flex; gap: 8px; align-items: center; }
+  .bm .num { width: 26px; color: var(--dim); text-align: right; font-variant-numeric: tabular-nums; }
+  .bm input { flex: 1; min-width: 0; font: inherit; color: var(--text); background: #262b35; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; }
+  .bm input:focus { outline: none; border-color: var(--accent); }
+  .empty { color: var(--dim); font-style: italic; }
+  .banner { display: none; margin-top: 10px; padding: 10px 12px; border-radius: 8px; background: #3a2e14; border: 1px solid #6b5420; color: var(--warn); align-items: center; gap: 12px; }
+  .banner.show { display: flex; }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #666; }
+  .dot.on { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+  /* live preview */
+  .preview { display: flex; align-items: center; gap: 22px; margin-top: 12px; flex-wrap: wrap; }
+  .stick { position: relative; width: 74px; height: 74px; border-radius: 50%; background: #262b35; border: 1px solid var(--line); }
+  .stick .dz { position: absolute; border-radius: 50%; border: 1px dashed #444b58; }
+  .stick .knob { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--accent); left: 50%; top: 50%; }
+  .cap { text-align: center; font-size: 11px; color: var(--dim); margin-top: 4px; }
+  .trig { width: 14px; height: 74px; border-radius: 4px; background: #262b35; border: 1px solid var(--line); position: relative; overflow: hidden; }
+  .trig .fill { position: absolute; bottom: 0; left: 0; right: 0; background: var(--accent); height: 0; }
+  .btns { display: flex; flex-wrap: wrap; gap: 5px; max-width: 330px; }
+  .btn { min-width: 36px; padding: 3px 6px; border-radius: 5px; background: #262b35; border: 1px solid var(--line); text-align: center; font-size: 11px; color: var(--dim); }
+  .btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  kbd { background: #262b35; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font: 12px "Segoe UI", sans-serif; }
+  .help { columns: 2; column-gap: 24px; color: var(--dim); font-size: 13px; }
+  .help div { break-inside: avoid; margin: 2px 0; }
+  .help b { color: var(--text); font-weight: 600; }
+  footer { display: flex; gap: 8px; padding: 12px 20px; }
+  .modal { display: none; position: fixed; inset: 0; background: rgba(8, 10, 14, .78); z-index: 10; align-items: center; justify-content: center; }
+  .modal.show { display: flex; }
+  .modal .box { width: 560px; max-width: 92vw; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 26px; }
+  .modal h3 { margin: 0 0 4px; font-size: 18px; }
+  .modal .big { font-size: 22px; font-weight: 600; margin: 18px 0 8px; min-height: 64px; }
+  .modal .barrow { display: flex; gap: 8px; margin-top: 16px; }
+  .progress { height: 4px; background: #262b35; border-radius: 2px; overflow: hidden; margin-top: 10px; }
+  .progress div { height: 100%; background: var(--accent); width: 0; transition: width .2s; }
+  #noteBar { display: none; margin-top: 10px; padding: 9px 12px; border-radius: 8px; background: #16283f; border: 1px solid #2d4f7a; color: #b9d4ff; }
+  #noteBar.show { display: block; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 10px; background: #262b35; border: 1px solid var(--line); font-size: 12px; color: var(--dim); }
+  footer .spacer { flex: 1; }
+</style>
+</head>
+<body>
+<div class="bar"><header>
+  <div>
+    <h1>StreetPad settings</h1>
+    <div class="sub">Controller: <b>D-pad</b> move · <b>← →</b> change · <b>A</b> select · <b>LB / RB</b> section · <b>B</b> close &nbsp;|&nbsp; Keyboard: <kbd>F1</kbd> / <kbd>Esc</kbd> close</div>
+  </div>
+  <div class="spacer"></div>
+  <span class="status"><span class="dot" id="activeDot"></span><span id="activeName">No controller</span></span>
+</header></div>
+
+<main>
+  <section>
+    <h2>Controller</h2>
+    <div class="row">
+      <label class="name" for="device">Device</label>
+      <select id="device"></select>
+    </div>
+    <div class="hint">Xbox controllers show up twice: once as <b>XInput</b> (recommended, supports vibration) and once as <b>generic</b>.</div>
+    <div class="row"><label class="name">Controller type</label><span class="pill" id="familyName"></span></div>
+    <div class="row">
+      <label class="name" for="profile">Profile</label>
+      <select id="profile"></select>
+    </div>
+    <div class="row">
+      <span class="name"></span>
+      <button id="profNew">New profile</button>
+      <input id="profName" placeholder="Profile name" maxlength="60" style="flex:1;min-width:0;font:inherit;color:var(--text);background:#262b35;border:1px solid var(--line);border-radius:6px;padding:6px 10px">
+      <button id="profRename">Rename</button>
+      <button id="profDelete">Delete</button>
+    </div>
+    <div class="hint">Each controller remembers its own profile. Presets never change: editing one saves your changes in a new personal profile.</div>
+    <div class="row" id="remapRow">
+      <label class="name">Button setup</label>
+      <button id="remapBtn">Set up buttons…</button>
+      <button id="remapClear">Clear setup</button>
+      <span class="hint" id="remapHint"></span>
+    </div>
+    <div id="noteBar"></div>
+    <label class="check"><input type="checkbox" data-k="vibration"> Vibration feedback (Xbox controllers)</label>
+    <div class="row"><label class="name">Vibration strength</label><input type="range" data-k="vibration_strength" min="0.1" max="1" step="0.05"><span class="val"></span></div>
+    <div class="preview">
+      <div><div class="stick" id="stickL"><div class="dz"></div><div class="knob"></div></div><div class="cap">Left stick</div></div>
+      <div><div class="stick" id="stickR"><div class="dz"></div><div class="knob"></div></div><div class="cap">Right stick</div></div>
+      <div><div class="trig" id="trigL"><div class="fill"></div></div><div class="cap" id="capLT">LT</div></div>
+      <div><div class="trig" id="trigR"><div class="fill"></div></div><div class="cap" id="capRT">RT</div></div>
+      <div class="btns" id="btnPreview"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Looking around</h2>
+    <div class="row"><label class="name">Horizontal speed</label><input type="range" data-k="look_speed_x" min="100" max="2500" step="25"><span class="val"></span></div>
+    <div class="row"><label class="name">Vertical speed</label><input type="range" data-k="look_speed_y" min="100" max="2500" step="25"><span class="val"></span></div>
+    <div class="row"><label class="name">Response curve</label><input type="range" data-k="look_curve" min="1" max="3" step="0.1"><span class="val"></span></div>
+    <div class="row"><label class="name">Dead zone</label><input type="range" data-k="deadzone" min="0" max="0.5" step="0.01"><span class="val"></span></div>
+    <label class="check"><input type="checkbox" data-k="invert_y"> Invert vertical look</label>
+    <label class="check"><input type="checkbox" data-k="swap_sticks"> Swap sticks (look with left, walk with right)</label>
+    <div class="row"><label class="name">Walk stick left/right</label>
+      <select data-k="left_x_mode"><option value="turn">Turns the view</option><option value="none">Does nothing</option></select></div>
+  </section>
+
+  <section>
+    <h2>Map</h2>
+    <div class="row"><label class="name">Panning speed</label><input type="range" data-k="pan_speed" min="150" max="5000" step="50"><span class="val"></span></div>
+    <div class="hint">On the map the crosshair stays in the centre and both sticks pan the map under it. A clicks at the crosshair, the triggers zoom there, and holding Y shows the blue Street View lines: release Y on a line to open Street View. The response curve and dead zone above apply too.</div>
+  </section>
+
+  <section>
+    <h2>Walking &amp; zoom</h2>
+    <div class="row"><label class="name">Steps per second</label><input type="range" data-k="move_rate" min="0.3" max="6" step="0.1"><span class="val"></span></div>
+    <div class="row"><label class="name">Run multiplier</label><input type="range" data-k="run_multiplier" min="1" max="4" step="0.1"><span class="val"></span></div>
+    <div class="row"><label class="name">Snap turn angle</label><input type="range" data-k="snap_angle" min="15" max="180" step="15"><span class="val"></span></div>
+    <div class="row"><label class="name">Trigger zoom speed</label><input type="range" data-k="zoom_rate" min="0.5" max="15" step="0.5"><span class="val"></span></div>
+    <label class="check"><input type="checkbox" data-k="vibrate_on_step"> Vibrate on each step (XInput controllers)</label>
+    <div class="hint">Street View moves in steps between photo spots; holding the stick forward keeps walking.</div>
+  </section>
+
+  <section>
+    <h2>Buttons</h2>
+    <div class="hint" style="margin-bottom:10px">Each button has a <b>tap</b> action and an optional <b>hold</b> action (hold ½ second). Buttons with a hold action fire their tap action on release. Walking, turning and run work while held, so they can't have a hold action.</div>
+    <div class="bmap" id="buttonMap"><div class="head">Button</div><div class="head">Tap</div><div class="head">Hold</div></div>
+  </section>
+
+  <section>
+    <h2>Bookmarks</h2>
+    <div class="bm-list" id="bmList"></div>
+    <div class="hint" style="margin-top:8px">Save the current place with <b>X</b>; browse with <b>D-pad ← / →</b>. Click a name to rename it.</div>
+  </section>
+
+  <section>
+    <h2>Google sign-in &amp; privacy</h2>
+    <label class="check"><input type="radio" name="login" value="remember"> <span><b>Remember my login</b>: browser profile kept in <span id="profileDir" class="hint"></span></span></label>
+    <label class="check"><input type="radio" name="login" value="private"> <span><b>Private</b>: temporary profile, wiped when StreetPad closes (sign in each time)</span></label>
+    <div class="banner" id="restartBanner">The login mode changes after a restart. <div style="flex:1"></div><button class="primary" id="restartBtn">Restart now</button></div>
+    <div class="row" style="margin-top:12px">
+      <button id="clearBtn">Sign out &amp; clear browser data</button>
+      <span class="hint" id="clearHint"></span>
+    </div>
+    <label class="check"><input type="checkbox" data-k="start_at_last_location"> Reopen where I left off</label>
+    <div class="hint">Settings are stored in the registry (HKCU\Software\StreetPad), not in files.</div>
+  </section>
+
+  <section>
+    <h2>Window</h2>
+    <label class="check"><input type="checkbox" data-k="fullscreen"> Start in fullscreen (<kbd>F11</kbd> or the fullscreen button switches while using the app)</label>
+    <label class="check"><input type="checkbox" data-k="crosshair"> Show aim crosshair while using the controller</label>
+    <label class="check"><input type="checkbox" data-k="only_when_focused"> Ignore the controller when StreetPad is not the active window</label>
+  </section>
+
+  <section>
+    <h2>About</h2>
+    <div class="help" id="about"></div>
+  </section>
+
+  <section>
+    <h2>Current controls</h2>
+    <div class="help" id="helpList">
+      <div><b>Right stick</b>: look around</div>
+      <div><b>Left stick up/down</b>: walk forward/back</div>
+      <div><b>Left stick left/right</b>: turn</div>
+      <div><b>RT / LT</b>: zoom in / out</div>
+      <div><b>A</b>: click at the crosshair (arrows, places, photos)</div>
+      <div><b>B</b>: step back</div>
+      <div><b>X</b>: browser back</div>
+      <div><b>Y</b>: Esc (leave Street View)</div>
+      <div><b>LB / RB</b>: zoom out / in</div>
+      <div><b>Left stick click</b>: run</div>
+      <div><b>D-pad</b>: walk and turn</div>
+      <div><b>Back</b>: fullscreen</div>
+      <div><b>Start</b>: these settings</div>
+    </div>
+    <div class="hint" style="margin-top:8px">To start: move the map so the crosshair is on a street and hold <b>Y</b> to enter Street View (or drag the yellow figure with the mouse).</div>
+  </section>
+</main>
+
+<div class="bar-top"><footer>
+  <button id="resetBtn">Reset controls</button>
+  <button id="homeBtn">Google Maps home</button>
+  <div class="spacer"></div>
+  <button class="primary" id="closeBtn">Close</button>
+</footer></div>
+
+<div class="modal" id="wizard"><div class="box">
+  <h3>Controller button setup</h3>
+  <div class="hint" id="wzStep"></div>
+  <div class="progress"><div id="wzBar"></div></div>
+  <div class="big" id="wzPrompt"></div>
+  <div class="hint" id="wzNote">Use the controller to answer. Skip anything your controller doesn't have.</div>
+  <div class="barrow"><button id="wzBack">Back</button><button id="wzSkip">Skip</button><div style="flex:1"></div><button class="primary" id="wzDone">Finish</button></div>
+</div></div>
+
+<script>
+(() => {
+  const ACTION_LABELS = {
+    none: 'Nothing', click: 'Click at crosshair', forward: 'Walk forward', back: 'Walk back',
+    turn_left: 'Turn left (smooth)', turn_right: 'Turn right (smooth)', look_up: 'Look up', look_down: 'Look down',
+    turn_around: 'Turn around 180°', snap_left: 'Snap turn left', snap_right: 'Snap turn right',
+    level_view: 'Level view & reset zoom', zoom_in: 'Zoom in', zoom_out: 'Zoom out', run: 'Run (while held)',
+    bookmark_save: 'Save bookmark', bookmark_next: 'Next bookmark', bookmark_prev: 'Previous bookmark',
+    settings: 'Settings panel', fullscreen: 'Fullscreen on/off', browser_back: 'Back (undo jump)',
+    escape: 'Esc (leave Street View)', reload: 'Reload page',
+  };
+  const BUTTON_LABELS = {
+    a: 'A', b: 'B', x: 'X', y: 'Y', lb: 'LB', rb: 'RB', back: 'Back', start: 'Start',
+    ls: 'Left stick click', rs: 'Right stick click', dup: 'D-pad up', ddown: 'D-pad down',
+    dleft: 'D-pad left', dright: 'D-pad right',
+  };
+  const SHORT = { ls: 'LS', rs: 'RS', dup: '↑', ddown: '↓', dleft: '←', dright: '→' };
+  const $ = (q) => document.querySelector(q);
+  const post = (o) => window.ipc.postMessage(JSON.stringify(o));
+  let S = null, ST = null, built = false, startLoginMode = null, CONTINUOUS = [];
+
+  function syncHoldEnabled() {
+    document.querySelectorAll('[data-hold]').forEach((el) => {
+      const b = el.dataset.hold;
+      el.disabled = CONTINUOUS.includes(S.buttons[b]);
+      el.value = S.hold_buttons[b] || 'none';
+    });
+  }
+
+  function renderBookmarks() {
+    const list = $('#bmList');
+    list.innerHTML = '';
+    if (!S.bookmarks.length) {
+      list.innerHTML = '<div class="empty">No bookmarks yet.</div>';
+      return;
+    }
+    S.bookmarks.forEach((bm, i) => {
+      const row = document.createElement('div'); row.className = 'bm';
+      const num = document.createElement('span'); num.className = 'num'; num.textContent = i + 1;
+      const name = document.createElement('input'); name.value = bm.name; name.maxLength = 120;
+      name.addEventListener('change', () => { S.bookmarks[i].name = name.value.trim() || 'Bookmark'; save(); });
+      const go = document.createElement('button'); go.textContent = 'Go';
+      go.addEventListener('click', () => post({ cmd: 'bookmarkGo', index: i }));
+      const up = document.createElement('button'); up.textContent = '↑'; up.title = 'Move up'; up.disabled = i === 0;
+      up.addEventListener('click', () => { const [m] = S.bookmarks.splice(i, 1); S.bookmarks.splice(i - 1, 0, m); save(); renderBookmarks(); });
+      const del = document.createElement('button'); del.textContent = 'Delete';
+      del.addEventListener('click', () => { S.bookmarks.splice(i, 1); S.bookmark_pos = 0; save(); renderBookmarks(); });
+      row.append(num, name, go, up, del);
+      list.appendChild(row);
+    });
+  }
+
+  // Live "current controls" list, generated from the actual bindings.
+  function renderHelp() {
+    const lines = [
+      ['Left stick', S.swap_sticks ? 'look around' : (S.left_x_mode === 'turn' ? 'walk (up/down), turn (left/right)' : 'walk (up/down)')],
+      ['Right stick', S.swap_sticks ? (S.left_x_mode === 'turn' ? 'walk (up/down), turn (left/right)' : 'walk (up/down)') : 'look around'],
+      ['RT / LT', 'zoom in / out'],
+    ];
+    for (const b of Object.keys(BUTTON_LABELS)) {
+      const t = S.buttons[b], h = S.hold_buttons[b];
+      if (t === 'none' && h === 'none') continue;
+      let txt = ACTION_LABELS[t] || t;
+      if (h && h !== 'none') txt += ' · hold: ' + (ACTION_LABELS[h] || h);
+      lines.push([BUTTON_LABELS[b], txt]);
+    }
+    $('#helpList').innerHTML = lines.map(([k, v]) => `<div><b>${k}</b>: ${v}</div>`).join('');
+  }
+
+  const fmt = (k, v) => {
+    if (k === 'deadzone' || k === 'vibration_strength') return Math.round(v * 100) + '%';
+    if (k === 'look_curve' || k === 'run_multiplier') return Number(v).toFixed(1) + '×';
+    if (k === 'move_rate' || k === 'zoom_rate') return Number(v).toFixed(1) + '/s';
+    if (k === 'snap_angle') return Math.round(v) + '°';
+    return String(Math.round(v));
+  };
+
+  function save() { post({ cmd: 'save', settings: S }); renderHelp(); }
+
+  function build(st) {
+    if (st.labels) Object.assign(ACTION_LABELS, st.labels);
+    if (st.buttonLabels) Object.assign(BUTTON_LABELS, st.buttonLabels);
+    // button mapping: tap + hold per button
+    const grid = $('#buttonMap');
+    const mkSelect = (b, map, holdMode) => {
+      const sel = document.createElement('select');
+      sel.dataset[holdMode ? 'hold' : 'button'] = b;
+      for (const a of st.actions) {
+        if (holdMode && st.continuous.includes(a)) continue;
+        const o = document.createElement('option');
+        o.value = a; o.textContent = (holdMode && a === 'none') ? '—' : (ACTION_LABELS[a] || a);
+        sel.appendChild(o);
+      }
+      sel.addEventListener('change', () => {
+        S[map][b] = sel.value;
+        if (!holdMode && st.continuous.includes(sel.value)) S.hold_buttons[b] = 'none';
+        syncHoldEnabled(); save();
+      });
+      return sel;
+    };
+    for (const b of st.buttons) {
+      const l = document.createElement('div'); l.dataset.blabel = b; l.textContent = BUTTON_LABELS[b] || b;
+      grid.append(l, mkSelect(b, 'buttons', false), mkSelect(b, 'hold_buttons', true));
+    }
+    CONTINUOUS = st.continuous;
+    // button preview chips
+    const bp = $('#btnPreview');
+    for (const b of st.buttons) {
+      const d = document.createElement('div');
+      d.className = 'btn'; d.dataset.b = b; d.textContent = SHORT[b] || BUTTON_LABELS[b];
+      bp.appendChild(d);
+    }
+    // generic inputs bound to settings keys
+    document.querySelectorAll('[data-k]').forEach((el) => {
+      const k = el.dataset.k;
+      const ev = el.type === 'range' ? 'input' : 'change';
+      el.addEventListener(ev, () => {
+        S[k] = el.type === 'checkbox' ? el.checked : el.type === 'range' ? Number(el.value) : el.value;
+        if (el.type === 'range') el.nextElementSibling.textContent = fmt(k, S[k]);
+        if (k === 'deadzone') drawDeadzone();
+        save();
+      });
+    });
+    document.querySelectorAll('input[name=login]').forEach((r) => r.addEventListener('change', () => {
+      S.login_mode = r.value; save();
+      $('#restartBanner').classList.toggle('show', S.login_mode !== startLoginMode);
+    }));
+    $('#device').addEventListener('change', () => { S.device = $('#device').value; save(); });
+    $('#restartBtn').addEventListener('click', () => post({ cmd: 'restart' }));
+    $('#profile').addEventListener('change', () => post({ cmd: 'profileSelect', id: $('#profile').value }));
+    $('#profNew').addEventListener('click', () => post({ cmd: 'profileNew' }));
+    $('#profRename').addEventListener('click', () => post({ cmd: 'profileRename', id: $('#profile').value, name: $('#profName').value }));
+    $('#profName').addEventListener('keydown', (e) => { if (e.key === 'Enter') post({ cmd: 'profileRename', id: $('#profile').value, name: $('#profName').value }); });
+    $('#profDelete').addEventListener('click', () => post({ cmd: 'profileDelete', id: $('#profile').value }));
+    $('#remapBtn').addEventListener('click', () => wizard.start());
+    $('#remapClear').addEventListener('click', () => post({ cmd: 'remapClear' }));
+    $('#wzSkip').addEventListener('click', () => wizard.next());
+    $('#wzBack').addEventListener('click', () => wizard.back());
+    $('#wzDone').addEventListener('click', () => wizard.finish());
+    $('#clearBtn').addEventListener('click', () => {
+      post({ cmd: 'clearData' });
+      $('#clearHint').textContent = 'Signed out, browser data cleared.';
+    });
+    $('#resetBtn').addEventListener('click', () => post({ cmd: 'reset' }));
+    $('#homeBtn').addEventListener('click', () => post({ cmd: 'home' }));
+    $('#closeBtn').addEventListener('click', () => post({ cmd: 'close' }));
+    addEventListener('keydown', (e) => {
+      if (wizard.active && e.key === 'Escape') { e.preventDefault(); wizard.finish(); return; }
+      if (e.key === 'F1' || e.key === 'Escape') { e.preventDefault(); wizard.finish(); post({ cmd: 'close' }); }
+      if (e.key === 'F11') { e.preventDefault(); post({ cmd: 'fullscreen' }); }
+    });
+    built = true;
+  }
+
+  function drawDeadzone() {
+    const dz = S ? S.deadzone : 0;
+    document.querySelectorAll('.stick .dz').forEach((d) => {
+      const p = 50 * dz;
+      d.style.left = d.style.top = (50 - p) + '%';
+      d.style.width = d.style.height = (2 * p) + '%';
+    });
+  }
+
+  function render(st) {
+    S = st.settings;
+    ST = st;
+    if (st.buttonLabels) Object.assign(BUTTON_LABELS, st.buttonLabels);
+    document.querySelectorAll('[data-blabel]').forEach((el) => { el.textContent = BUTTON_LABELS[el.dataset.blabel] || el.dataset.blabel; });
+    document.querySelectorAll('#btnPreview .btn').forEach((d) => { const b = d.dataset.b; d.textContent = SHORT[b] && !['a','b','x','y','lb','rb','back','start'].includes(b) ? SHORT[b] : (BUTTON_LABELS[b] || b).replace(' / Create', ''); });
+    if (st.triggerLabels) { $('#capLT').textContent = st.triggerLabels[0]; $('#capRT').textContent = st.triggerLabels[1]; }
+    // profiles
+    $('#familyName').textContent = st.familyName + (st.active ? '' : ' (no controller)');
+    const ps = $('#profile');
+    ps.innerHTML = '';
+    for (const p of st.profiles) {
+      const o = document.createElement('option');
+      o.value = p.id; o.textContent = p.name + (p.remapped ? '  · custom buttons' : '');
+      ps.appendChild(o);
+    }
+    ps.value = st.activeProfile || ('preset:' + st.family);
+    const cur = st.profiles.find((p) => p.id === ps.value);
+    const user = !!cur && !cur.builtin;
+    $('#profRename').disabled = !user; $('#profDelete').disabled = !user;
+    if (document.activeElement !== $('#profName')) $('#profName').value = user ? cur.name : '';
+    $('#profName').disabled = !user;
+    const generic = st.deviceKind === 'generic';
+    $('#remapBtn').disabled = !generic;
+    $('#remapClear').disabled = !generic || !Object.keys(S.remap.inputs || {}).length;
+    $('#remapHint').textContent = generic
+      ? (Object.keys(S.remap.inputs || {}).length ? Object.keys(S.remap.inputs).length + ' controls set up' : 'Use this if buttons or sticks are wrong')
+      : 'Xbox controllers (XInput) are set up automatically';
+    if (startLoginMode === null) startLoginMode = st.runningLoginMode;
+    // devices
+    const sel = $('#device');
+    sel.innerHTML = '';
+    const add = (v, t) => { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); };
+    add('auto', 'Automatic (first connected controller)');
+    for (const d of st.devices) add(d.id, d.name);
+    if (S.device !== 'auto' && !st.devices.some((d) => d.id === S.device)) add(S.device, 'Previously selected controller (not connected)');
+    sel.value = S.device;
+    // active
+    $('#activeName').textContent = st.active || 'No controller';
+    $('#activeDot').classList.toggle('on', !!st.active);
+    // fields
+    document.querySelectorAll('[data-k]').forEach((el) => {
+      const v = S[el.dataset.k];
+      if (el.type === 'checkbox') el.checked = !!v;
+      else el.value = v;
+      if (el.type === 'range') el.nextElementSibling.textContent = fmt(el.dataset.k, v);
+    });
+    document.querySelectorAll('[data-button]').forEach((el) => { el.value = S.buttons[el.dataset.button]; });
+    syncHoldEnabled();
+    renderBookmarks();
+    renderHelp();
+    document.querySelectorAll('input[name=login]').forEach((r) => { r.checked = r.value === S.login_mode; });
+    $('#restartBanner').classList.toggle('show', S.login_mode !== startLoginMode);
+    $('#profileDir').textContent = st.profileDir;
+    const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    $('#about').innerHTML = [
+      ['StreetPad', 'version ' + st.version],
+      ['Browser engine', 'Microsoft Edge WebView2 ' + (st.engine || '')],
+      ['Settings', 'Registry: HKCU\\Software\\StreetPad'],
+      ['Browser profile', st.profileDir],
+    ].map(([k, v]) => `<div><b>${esc(k)}</b>: ${esc(v)}</div>`).join('');
+    drawDeadzone();
+  }
+
+  function knob(id, x, y) {
+    const k = document.querySelector(id + ' .knob');
+    k.style.left = (50 + 50 * Math.max(-1, Math.min(1, x))) + '%';
+    k.style.top = (50 - 50 * Math.max(-1, Math.min(1, y))) + '%';
+  }
+
+  // ---- button setup wizard (generic controllers)
+  const wizard = {
+    active: false, i: 0, steps: [],
+    build() {
+      const B = (b, where) => ({ t: b, p: `Press ${BUTTON_LABELS[b] || b}` + (where ? ` <span class="hint">(${where})</span>` : '') });
+      const tl = (ST && ST.triggerLabels) || ['LT', 'RT'];
+      this.steps = [
+        B('a', 'bottom face button'), B('b', 'right face button'), B('x', 'left face button'), B('y', 'top face button'),
+        B('lb', 'left shoulder'), B('rb', 'right shoulder'),
+        { t: 'lt', p: `Pull ${tl[0]} <span class="hint">(left trigger)</span>` }, { t: 'rt', p: `Pull ${tl[1]} <span class="hint">(right trigger)</span>` },
+        B('back', 'small left centre button'), B('start', 'small right centre button'),
+        B('ls', 'click the left stick'), B('rs', 'click the right stick'),
+        B('dup'), B('ddown'), B('dleft'), B('dright'),
+        { t: 'lx', p: 'Push the <b>left</b> stick to the <b>right</b>' }, { t: 'ly', p: 'Push the <b>left</b> stick <b>up</b>' },
+        { t: 'rx', p: 'Push the <b>right</b> stick to the <b>right</b>' }, { t: 'ry', p: 'Push the <b>right</b> stick <b>up</b>' },
+      ];
+    },
+    start() { this.build(); this.active = true; this.i = 0; $('#wizard').classList.add('show'); this.show(); },
+    show() {
+      if (this.i >= this.steps.length) { this.finish('All done: your controller is set up.'); return; }
+      const s = this.steps[this.i];
+      $('#wzStep').textContent = `Step ${this.i + 1} of ${this.steps.length}`;
+      $('#wzBar').style.width = (100 * this.i / this.steps.length) + '%';
+      $('#wzPrompt').innerHTML = s.p;
+      post({ cmd: 'remapStart', target: s.t });
+    },
+    next() { this.i++; this.show(); },
+    back() { if (this.i > 0) { this.i--; this.show(); } },
+    finish(msg) {
+      if (!this.active) return;
+      this.active = false;
+      post({ cmd: 'remapCancel' });
+      $('#wizard').classList.remove('show');
+      if (msg) sp.note(msg);
+    },
+  };
+
+  // ---- controller navigation of this page
+  const focusables = () => [...document.querySelectorAll('main select, main input, main button, footer button')]
+    .filter((el) => !el.disabled && el.offsetParent !== null);
+  function setFocus(el) {
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    document.querySelectorAll('section.current').forEach((x) => x.classList.remove('current'));
+    const sec = el.closest('section'); if (sec) sec.classList.add('current');
+  }
+  function nav(cmd) {
+    const list = focusables();
+    const i = list.indexOf(document.activeElement);
+    if (i < 0) { setFocus(list[0]); return; }
+    const el = list[i];
+    const clampIdx = (k) => Math.max(0, Math.min(list.length - 1, k));
+    if (cmd === 'up') setFocus(list[clampIdx(i - 1)]);
+    else if (cmd === 'down') setFocus(list[clampIdx(i + 1)]);
+    else if (cmd === 'left' || cmd === 'right') {
+      const d = cmd === 'right' ? 1 : -1;
+      if (el.type === 'range') {
+        if (d > 0) el.stepUp(); else el.stepDown();
+        el.dispatchEvent(new Event('input'));
+      } else if (el.tagName === 'SELECT') {
+        const k = el.selectedIndex + d;
+        if (k >= 0 && k < el.options.length) { el.selectedIndex = k; el.dispatchEvent(new Event('change')); }
+      } else {
+        setFocus(list[clampIdx(i + d)]);
+      }
+    } else if (cmd === 'activate') {
+      if (el.type === 'checkbox' || el.type === 'radio' || el.tagName === 'BUTTON') el.click();
+    } else if (cmd === 'prev_section' || cmd === 'next_section') {
+      const secs = [...document.querySelectorAll('main section')];
+      const cur = secs.indexOf(el.closest('section'));
+      const step = cmd === 'next_section' ? 1 : -1;
+      for (let k = cur + step; k >= 0 && k < secs.length; k += step) {
+        const first = focusables().find((f) => secs[k].contains(f));
+        if (first) { setFocus(first); secs[k].scrollIntoView({ block: 'start', behavior: 'smooth' }); break; }
+      }
+    }
+  }
+
+  window.sp = {
+    nav,
+    captured(target, note) {
+      if (note) sp.note(note);
+      if (wizard.active && wizard.steps[wizard.i] && wizard.steps[wizard.i].t === target) setTimeout(() => wizard.next(), 350);
+    },
+    note(text) {
+      const n = $('#noteBar'); n.textContent = text; n.classList.add('show');
+      clearTimeout(sp._nt); sp._nt = setTimeout(() => n.classList.remove('show'), 9000);
+    },
+    state(st) { if (!built) build(st); render(st); },
+    pad(p) {
+      knob('#stickL', p.lx, p.ly);
+      knob('#stickR', p.rx, p.ry);
+      document.querySelector('#trigL .fill').style.height = (p.lt * 100) + '%';
+      document.querySelector('#trigR .fill').style.height = (p.rt * 100) + '%';
+      document.querySelectorAll('#btnPreview .btn').forEach((d) => d.classList.toggle('on', p.buttons.includes(d.dataset.b)));
+    },
+  };
+  post({ cmd: 'ready' });
+})();
+</script>
+</body>
+</html>

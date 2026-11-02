@@ -1,0 +1,6 @@
+[build]
+target = "x86_64-pc-windows-msvc"
+
+[target.x86_64-pc-windows-msvc]
+# Static CRT: no vcruntime140.dll needed. /ignore:4099 silences missing-PDB noise from the MSVC CRT.
+rustflags = ["-C", "target-feature=+crt-static", "-C", "link-arg=/ignore:4099"]

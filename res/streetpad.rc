@@ -1,0 +1,28 @@
+#pragma code_page(65001)
+1 ICON "streetpad.ico"
+1 24 "streetpad.manifest"
+1 VERSIONINFO
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
+FILEOS 0x40004
+FILETYPE 0x1
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "CompanyName", "zoutmax"
+      VALUE "FileDescription", "StreetPad - Street View with a game controller"
+      VALUE "FileVersion", "1.0.0"
+      VALUE "InternalName", "StreetPad"
+      VALUE "OriginalFilename", "StreetPad.exe"
+      VALUE "ProductName", "StreetPad"
+      VALUE "ProductVersion", "1.0.0"
+      VALUE "LegalCopyright", "Copyright (c) 2026 zoutmax. All rights reserved."
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END
